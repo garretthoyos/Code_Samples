@@ -1,0 +1,440 @@
+// C++ CODE SAMPLE (other source code is not contained here) 
+
+#include "BattleArena.h"
+#include "Fighter.h" 
+#include "Archer.h"
+#include "Cleric.h"
+#include "Robot.h"
+#include <sstream> 
+
+BattleArena::BattleArena(){
+}
+bool BattleArena::addFighter(string info){
+	string name;  
+	string type;
+	int strength; 
+	int max_hp; 
+	int speed; 
+	int magic;
+	FighterInterface* myFighter;
+	stringstream mystring;
+	mystring.str(info);
+	mystring >> name >> type >> max_hp >> strength >> speed >> magic;
+	//Add fighter type
+	if (type == "A"){
+		myFighter= new Archer (name, max_hp, strength, speed, magic); 
+		bunchOfFighters.push_back(myFighter);
+		return true; 
+	}
+	else if (type == "C"){
+		myFighter= new Cleric (name, max_hp, strength, speed, magic); 
+		bunchOfFighters.push_back(myFighter);
+		return true; 
+	}
+	else if (type == "R"){
+		myFighter= new Robot (name, max_hp, strength, speed, magic); 
+		bunchOfFighters.push_back(myFighter);
+		return true; 
+	}
+	else{
+		return false; 
+	}
+}
+bool BattleArena::removeFighter(string name){
+	for (unsigned int i = 0; i < bunchOfFighters.size(); i++){
+		if (bunchOfFighters[i]->getName() == name){ 
+			bunchOfFighters.erase(bunchOfFighters.begin() + i);
+				return true; 
+		} 
+	}
+}
+FighterInterface* BattleArena::getFighter(string name){
+	for (unsigned int i = 0; i < bunchOfFighters.size(); i++){
+		if (bunchOfFighters[i]->getName() == name){ 
+			return bunchOfFighters[i];
+		}
+	}
+}
+int BattleArena::getSize(){
+	return bunchOfFighters.size(); 
+}
+
+
+
+// C++ CODE SAMPLE								 GARRETT HOYOS
+
+// ATTACHED ARE CPP AND HEADER FILES WRITTEN IN THE C++ PROGRAMMING LANGUAGE
+// THESE FILES COMPILE WITH A MAIN.CPP (NOT INCLUDED) DESIGNED BY ANOTHER STUDENT
+// THE FOLLOWING CODE ADDS 3 FIGHTER TYPES IN TEAMS TO A BATTLE AND ALLOWS THEM TO DUEL
+------------------------------------------------------------------------------------------------
+
+// BATTLE_ARENA.CPP 
+
+#include "BattleArena.h"
+#include "Fighter.h" 
+#include "Archer.h"
+#include "Cleric.h"
+#include "Robot.h"
+#include <sstream> 
+
+BattleArena::BattleArena(){
+}
+bool BattleArena::addFighter(string info){
+	string name;  
+	string type;
+	int strength; 
+	int max_hp; 
+	int speed; 
+	int magic;
+	FighterInterface* myFighter;
+	stringstream mystring;
+	mystring.str(info);
+	mystring >> name >> type >> max_hp >> strength >> speed >> magic;
+	//Add fighter type
+	if (type == "A"){
+		myFighter= new Archer (name, max_hp, strength, speed, magic); 
+		bunchOfFighters.push_back(myFighter);
+		return true; 
+	}
+	else if (type == "C"){
+		myFighter= new Cleric (name, max_hp, strength, speed, magic); 
+		bunchOfFighters.push_back(myFighter);
+		return true; 
+	}
+	else if (type == "R"){
+		myFighter= new Robot (name, max_hp, strength, speed, magic); 
+		bunchOfFighters.push_back(myFighter);
+		return true; 
+	}
+	else{
+		return false; 
+	}
+}
+bool BattleArena::removeFighter(string name){
+	for (unsigned int i = 0; i < bunchOfFighters.size(); i++){
+		if (bunchOfFighters[i]->getName() == name){ 
+			bunchOfFighters.erase(bunchOfFighters.begin() + i);
+				return true; 
+		} 
+	}
+}
+FighterInterface* BattleArena::getFighter(string name){
+	for (unsigned int i = 0; i < bunchOfFighters.size(); i++){
+		if (bunchOfFighters[i]->getName() == name){ 
+			return bunchOfFighters[i];
+		}
+	}
+}
+int BattleArena::getSize(){
+	return bunchOfFighters.size(); 
+	
+------------------------------------------------------------------------------------------------
+
+//FIGHTER.H
+
+#pragma once
+#include "FighterInterface.h"
+
+class Fighter : public FighterInterface
+{
+public:
+	Fighter();
+	Fighter(string name, int max_hp, int strength, int speed, int magic);
+	string getName();
+	int getMaximumHP();
+	int getCurrentHP();
+	int getStrength();
+	int getSpeed();
+	int getMagic();
+	virtual int getDamage();
+	void takeDamage(int damage);
+	virtual void reset();
+	virtual void regenerate();
+	virtual bool useAbility();
+	bool isSimplified();
+protected:
+	string name; // this string holds the name of a Fighter
+	int max_hp;	//this int will hold the maximum hit points of a fighter
+	int current_hp; // this int will hold the current hit points of a fighter
+	int strength; // this int will hold the strength of a warrior
+	int speed; // this int will hold the speed of a warrior
+	int magic; // this int will hold the magic of a warrior
+};	
+
+------------------------------------------------------------------------------------------------
+
+//FIGHTER.CPP 
+
+#include "Fighter.h"
+#include <sstream>
+#include <string> 
+// Class for the subclass Robot, Cleric, Archer
+Fighter::Fighter(){
+}
+Fighter::Fighter(string name, int max_hp, int strength, int speed, int magic){
+this-> name = name;
+this-> max_hp = max_hp;
+this-> current_hp = current_hp;
+this-> strength = strength; 
+this-> speed = speed; 
+this-> magic = magic; 
+}
+int Fighter::getCurrentHP(){
+	return current_hp; 
+}
+int Fighter::getDamage(){ 
+	//  see Robot, Cleric, Archer
+	return 0;
+}
+void Fighter::reset(){
+	current_hp = max_hp; 
+}
+string Fighter::getName(){
+	return name; 
+}
+int Fighter::getMaximumHP(){
+	return max_hp; 
+}
+int Fighter::getStrength(){
+	return strength; 
+}
+int Fighter::getSpeed(){
+	return speed; 
+}
+int Fighter::getMagic(){
+	return magic; 
+}
+void Fighter::takeDamage(int damage){
+	if ((damage - (speed/4)) < 1){
+		current_hp = current_hp - 1;
+	}
+	else{ 
+		current_hp = current_hp - (damage - (speed/4));
+	}
+}
+void Fighter::regenerate(){
+	current_hp = current_hp + (strength/6);
+
+	if ((strength/6)< 1)
+		current_hp = current_hp + 1;
+
+	if (current_hp > max_hp) 
+		current_hp = max_hp;
+}
+bool Fighter::useAbility(){
+	return true; 
+}
+bool Fighter::isSimplified(){
+	return false; 
+}
+
+------------------------------------------------------------------------------------------------	
+
+// ROBOT.H
+
+#pragma once
+#include "Fighter.h"
+
+class Robot: public Fighter
+{
+public:
+	Robot();
+	Robot(string name, int max_hp, int strength, int speed, int magic);
+	int getDamage();
+	void reset();
+	bool useAbility();
+private:
+	double bonus_damage; 
+	double current_electricity;
+	double max_electricity; 
+};
+------------------------------------------------------------------------------------------------	
+
+// ROBOT.CPP  
+
+#include "Robot.h" 
+#include "Fighter.h"
+#include <cmath>
+#pragma once
+
+Robot::Robot(){
+}
+Robot::Robot(string name, int max_hp, int strength, int speed, int magic)
+	: Fighter (name, max_hp, strength, speed, magic){
+	max_electricity = 2*magic;
+	current_electricity = 10;
+}
+int Robot::getDamage(){
+	int damage = strength + bonus_damage; 
+	return damage; 
+}
+void Robot::reset(){
+	//Restores Robot's current energy to its maximum value
+	Fighter::reset();
+	max_electricity = 2*magic;
+	current_electricity = max_electricity; 
+}
+bool Robot::useAbility(){
+	//Shockwave Punch
+	// Adds bonus damgage to next attack only if Robot has energy
+	// Decreases current energy by ability cost when used
+	if (current_electricity > ROBOT_ABILITY_COST){
+		bonus_damage = (strength * (pow((current_electricity/max_electricity),4)));
+		current_electricity -= ROBOT_ABILITY_COST;
+	}
+	return false; 
+}
+
+#include "Archer.h"
+#include "Fighter.h"
+#pragma once
+
+Archer::Archer(){
+}
+Archer::Archer(string name, int max_hp, int strength, int speed, int magic)
+	: Fighter (name, max_hp, strength, speed, magic){
+	startingSpeed = speed;
+}
+int Archer::getDamage(){
+	return speed; 
+}
+bool Archer::useAbility(){	
+// Quickstep. Increase speed by one point each time ability is used
+	speed ++; 
+	if (speed > startingSpeed){
+		return true;
+	}
+	else{
+		return false; 
+	}
+}
+void Archer::reset(){
+	Fighter::reset(); 
+	speed = startingSpeed; 
+}
+
+------------------------------------------------------------------------------------------------
+
+// CLERIC.H
+
+#pragma once
+#include "Fighter.h"
+
+class Cleric: public Fighter 
+{
+public:
+	Cleric(); 
+	Cleric(string name, int current_hp, int strength, int speed, int magic);
+	int getDamage();
+	void reset(); 
+	void regenerate(); 
+	bool useAbility(); 
+private:
+	int current_mana; 
+	int max_mana; 
+};
+------------------------------------------------------------------------------------------------
+	
+//CLERIC.CPP
+
+#include "Cleric.h"
+#include "Fighter.h"
+#pragma once
+
+Cleric::Cleric(){
+}
+Cleric::Cleric(string name, int max_hp, int strength, int speed, int magic)
+	: Fighter (name, max_hp, strength, speed, magic){
+	max_mana = magic *5;
+	current_mana = max_mana;
+}
+int Cleric::getDamage(){
+	return magic;
+}
+void Cleric::reset(){
+//Also restores a Cleric's current mana to its maximum value (which is 5 times its magic).
+	Fighter::reset(); 
+	max_mana = magic * 5; 
+	current_mana = max_mana; 
+}
+void Cleric::regenerate(){
+	Fighter::regenerate();
+	// Increase mana by one fifth of magic 
+	current_mana += (magic/5);
+
+	if ((magic/5)< 1){
+		current_mana = current_mana + 1;
+	}
+	if (current_mana > max_mana){
+		current_mana = max_mana; 
+	}
+}
+bool Cleric::useAbility(){ 
+// Healing Light: Increase HP by 1/3 of magic if he has mana
+// Decrease mana each time he uses it
+	if (current_mana >= CLERIC_ABILITY_COST){
+		if (magic/3 < 1) {
+			current_hp += 1;
+		}
+		else{
+			current_hp += magic/3;
+		}
+		if (current_hp > max_hp)
+			current_hp = max_hp;
+		current_mana -= CLERIC_ABILITY_COST;
+			return true; 
+		}
+		else{
+			return	false; 
+		}
+	}
+	
+------------------------------------------------------------------------------------------------
+
+//ARCHER.H
+
+#pragma once
+#include "Fighter.h"
+class Archer : public Fighter
+{
+public:
+	Archer();
+	Archer(string name, int max_hp, int strength, int speed, int magic);
+	int getDamage(); 
+	void reset(); 
+	bool useAbility(); 
+private: 
+	int startingSpeed; 
+};
+
+------------------------------------------------------------------------------------------------
+
+// ARCHER.CPP 
+
+#include "Archer.h"
+#include "Fighter.h"
+#pragma once
+
+Archer::Archer(){
+}
+Archer::Archer(string name, int max_hp, int strength, int speed, int magic)
+	: Fighter (name, max_hp, strength, speed, magic){
+	startingSpeed = speed;
+}
+int Archer::getDamage(){
+	return speed; 
+}
+bool Archer::useAbility(){	
+// Quickstep. Increase speed by one point each time ability is used
+	speed ++; 
+	if (speed > startingSpeed){
+		return true;
+	}
+	else{
+		return false; 
+	}
+}
+void Archer::reset(){	
+	Fighter::reset(); 
+	speed = startingSpeed; 
+}	
