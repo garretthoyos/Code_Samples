@@ -1,0 +1,258 @@
+# Raytracer Created by Garrett Hoyos
+# March 2015
+import math
+
+# Create Vector Class (contains linear algebra functions)
+class Vector(object):
+       # Initialize world space variables 
+        def __init__(self,x,y,z):
+                self.x = x
+                self.y = y
+                self.z = z
+       # Multiply 2 vectors 
+        def dotProduct(self, b):
+                return (self.x * b.x + self.y * b.y + self.z * b.z)
+        # Multiply 2 vectors
+        def crossProduct(self, b):
+                return ((self.y * b.z) - (self.z * b.y), (self.z * b.x) - (self.x * b.z), (self.x * b.y) - (self.y * b.x))
+        # Magnitude
+        def length(self):
+                return math.sqrt((self.x * self.x) + (self.y * self.y) + (self.z * self.z))
+        # Normalize 0 -1 
+        def normalize(self):
+                length = self.length()
+                self.x = self.x / length
+                self.y = self.y / length
+                self.z = self.z / length
+        # So you can add Vectors
+        def __add__(self, b):
+                return Vector(self.x + b.x, self.y+b.y, self.z+b.z)
+        # So you can subract Vectors
+        def __sub__(self, b):
+                return Vector(self.x-b.x, self.y-b.y, self.z-b.z)
+        # So you can multiply Vectors     
+        def __mul__(self, b):
+                if type(b) == float or type(b) == int:
+                    return Vector(self.x*b, self.y*b, self.z*b)   
+                else:
+                    return Vector(self.x*b.x, self.y*b.y, self.z*b.z)
+        # So you can divide Vectors
+        def __div__(self, b):
+                return Vector(self.x/b.x, self.y/b.y, self.z/b.z)
+# Ray Class     
+class Ray(object):
+       
+        def __init__(self, origin, direction):
+                self.origin = origin
+                self.direction = direction
+                self.t = 100000
+
+# Sphere class with sphere functions and intersect function
+class Sphere(object):
+
+    def __init__(self, position, radius, color):
+        self.radius = radius
+        self.position = position
+        self.color = color 
+# Radius
+    def getRadius(self):
+        return self.radius
+# Surface Area function
+    def getSurfaceArea(self):
+        self.area = 4 * math.pi * (r*r)
+        return self.area
+
+    def Normal(self, point):
+
+        self.point = point
+        n = (point - self.position) 
+        n.normalize()
+        return n
+
+# Volume function
+    def getVolume(self):
+        self.volume = (4/3) * math.pi * (r * r * r)
+        return self.volume
+
+# Center of Sphere
+    def getCenter(self):
+        self.center = (radius/2) 
+        return self.center
+
+    def intersect(self, ray):
+    # function to find intersection of ray and object 
+    # Dist shoudl be a scalar, and normal shoudl be a vector object.
+            difference = ray.origin - self.position 
+            b = difference.dotProduct(ray.direction) * 2
+            c = difference.dotProduct(difference) - self.radius * self.radius 
+            d = (b * b) - 4 * c
+            if d < 0:
+                    return False
+            #  if discriminant == 0  your distance = -b / 2
+            #  solve for if the ray is behind you maybe
+            t0 = ((-b - math.sqrt(d))/ 2)
+            if t0 <= 0:
+                    t1 = ((-b + math.sqrt(d))/ 2)
+                    if t1 <= 0:
+                            return False
+                    else: 
+                            t = t1
+            else:
+                    t = t0
+
+# t is the result of the quadratic equation aka the distance value (float)
+# p is the position (vector) of the intersection in world space
+                    # return p
+            if ray.t > t : 
+                    ray.t = t 
+                    return True
+            else:
+                    return False
+
+# you need a way to tell it was the first one it hit - you need a "ray hit object class"
+# which is an index into your list of objects. so after the intesections you can get the color
+# and normal and shade it and everything. 
+
+# Light Properties defined here
+#class Light(object):
+
+# Intersect Properties defined here
+class Intersection(object):
+        def __init__(self,point,distance,normal,obj,color):
+                self.point = point
+                self.distance = distance
+                self.normal = normal
+                self.obj = obj
+                self.color = color 
+
+class Light(object):
+        def __init__(self, position, color, intensity):
+                self.position = position
+                self.color = color
+                self.intensity = intensity
+
+#class Shader(object):
+
+ #       def Material(self, Sphere, Vector, Light):
+ #   shade = vector.dotProduct( light.position )
+ #   if (shade < 0)
+ #   shade = 0
+ #   point_color =  sphere.color * ( ambient_coefficient + diffuse_coefficient * shade )
+
+# Scene properties defined here
+class Scene(object):
+        #Initialize ability to add multiple spheres, lights
+        def __init__(self):
+                self.Sphere = []
+                self.cameraPosition = Vector(0.0, 0.0, -1.0)
+                self.Light = []
+                self.color = Vector(.1,.2,.1)
+
+        def addSphere(self, x, y, z, radius, color):
+                self.Sphere.append(Sphere(Vector(x,y,z), radius, color))
+       
+        def addLight(self, x, y, z, color, intensity):
+                self.Light.append(Light(Vector(x,y,z), color, intensity))
+
+        def Diffuse(self, ray, sphere):
+                # point = point of intersection
+                point = ray.origin + (ray.direction * ray.t)
+                n = sphere.Normal(point)
+                for light in self.Light:
+                    # l = lightvector from position ray hit to position of light
+                    l =  (light.position - point)
+                    lambert = max(0.0, n.dotProduct(l))
+                    phong = 256
+                    #phong = max(0.0, 1)
+                    r = Vector(n.x * 2,n.y * 2,n.z * 2) * (n.dotProduct(l))
+                    reflect = r - l
+                    reflect.normalize()
+                    specular = math.pow(max(self.cameraPosition.dotProduct(reflect), 0.0),phong)
+                    ambientLight = Vector(.6, .6, .6)
+                    lightColor = Vector(1, 1 , 1)
+                    specularColor = lightColor  * phong * specular
+                    print "specColor"
+                    print specularColor.x
+                    print specularColor.y
+                    print specularColor.z
+
+                      # Blinn-Phong shading (specular).
+ #   col += max(np.dot(N, normalize(toL + toO)), 0) ** specular_k
+ #   return col
+#
+                    diffuse = (lightColor + sphere.color * lambert)
+                    color = ambientLight + diffuse + specularColor 
+                    if color < 0:
+                        color = 0
+                return color
+                    #if ndotL > 0: 
+                    # Test for shadows
+                    #   shadowed = false
+                    #   distToLight = 
+                    #Newcolor = ndotL * color
+#color = Vector(1,1,1) * 
+
+      # Code to create .ppn image (open with Photoshop or Gimp)
+        def createImage(self, Image, width, height):
+
+                image_file = open("a.ppm", "w")
+                image_file.write("P3\n") # magic number so photoshop knows what kind of file it is
+                image_file.write(str(width)+'\n')
+                image_file.write(str(height)+'\n')
+                image_file.write('255\n')
+                for i in range(width):
+                    for j in range(height):
+                        red = max(0, min(int(Image[i][j].x*255), 255))
+                        green = max(0, min(int(Image[i][j].y*255), 255))
+                        blue = max(0, min(int(Image[i][j].z*255), 255))
+                        image_file.write(str(red) + ' ' + str(green) + ' ' + str(blue) + '\n')
+                image_file.close()
+                print "render complete"
+
+        # Create raytracer 
+        def raytrace(self):
+                print 'render started'
+                width = 240
+                height = 240
+                # create 2d array of vectors that is your image
+                Image = [[Vector(0,0,0) for x in range(width)] for y in range(height)]
+                aspect_ratio = float(width)/float(height)
+                # field of view in degrees
+                fov_degrees = 45.0 
+                # convert to radians
+                fov_radians = fov_degrees*(math.pi/180.0) 
+                image_plane_width = math.tan((fov_radians/2.0)*2.0)
+                image_plane_height = math.tan((fov_radians*aspect_ratio)/2.0)*2.0
+                pixel_width = image_plane_width/float(width)
+                for x in range(height):
+                    for y in range(width):
+                        rayDestination =  Vector((pixel_width*float(x))-image_plane_width/2, (pixel_width*float(y))-image_plane_height/2, 0.0)
+                        # rayDirection is how you get a vector between the center of the pixel
+                        # to the camera
+                        rayDirection = rayDestination - self.cameraPosition
+                        rayDirection.normalize()
+                        ray = Ray(self.cameraPosition, rayDirection)
+                        #Image[x][y] = self.color * self.Diffuse(ray, sphere)
+
+                        for sphere in self.Sphere:
+                            if sphere.intersect(ray):
+                                Image[x][y] = self.color * self.Diffuse(ray, sphere) 
+                                        #self.Diffuse(ray, sphere)
+                                #Image[x][y] = self.color 
+                                        # Set the pixel x/y equal to the result of shading my sphere
+                                        # at the point this ray hits on the sphere
+                self.createImage(Image, width, height)
+                # sphere intersection 
+                # after ray intersects sphere image[x][y] = color 
+
+if __name__ == '__main__':
+    
+    # Create Scene
+    scene = Scene()
+    scene.addSphere(0.0,0.0,0.0, .25, Vector(.2,.2,.2))
+    scene.addLight(-10.0,-10, -10.0,Vector(.2,.2,.2),.005)
+
+    # Create Image
+    # scene.createImage()
+    # Render
+    scene.raytrace()
